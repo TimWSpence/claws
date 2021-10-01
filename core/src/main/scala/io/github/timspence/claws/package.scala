@@ -97,7 +97,7 @@ object FingerTree:
 
       given [M, A](using M: Measured[M, A]): Measured[M, Node[M, A]] =
         new Measured[M, Node[M, A]]:
-          override val ev = M.ev
+          override val ev: Monoid[M] = M.ev
 
           extension (a: Node[M, A])
             def measure: M = a.measure
@@ -134,6 +134,14 @@ object FingerTree:
         case Two(x,y) => Two(f(x), f(y))
         case Three(x,y,z) => Three(f(x), f(y), f(z))
         case Four(w,x,y,z) => Four(f(w), f(x), f(y), f(z))
+
+    object Digit:
+      given [M, A](using M: Measured[M, A]): Measured[M, Digit[A]] =
+        new Measured[M, Digit[A]]:
+          override val ev: Monoid[M] = M.ev
+
+          extension (a: Digit[A])
+            def measure: M = a.measure
 
 
 trait Measured[M, A]:
