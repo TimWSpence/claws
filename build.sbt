@@ -2,7 +2,7 @@ ThisBuild / baseVersion := "0.11"
 
 ThisBuild / organization := "io.github.timwspence"
 ThisBuild / organizationName := "TimWSpence"
-ThisBuild / startYear := Some(2017)
+ThisBuild / startYear := Some(2021)
 ThisBuild / endYear := Some(2021)
 publishGithubUser in ThisBuild := "TimWSpence"
 publishFullName in ThisBuild := "Tim Spence"
@@ -15,7 +15,7 @@ val PrimaryOS = "ubuntu-latest"
 
 val Scala3 = "3.0.2"
 
-ThisBuild / crossScalaVersions := Seq("Scala3")
+ThisBuild / crossScalaVersions := Seq(Scala3)
 
 val LTSJava = "adopt@1.11"
 val LatestJava = "adopt@1.15"
@@ -27,14 +27,14 @@ ThisBuild / githubWorkflowOSes := Seq(PrimaryOS)
 ThisBuild / githubWorkflowBuild := Seq(
   WorkflowStep.Sbt(List("${{ matrix.ci }}")),
 
-  WorkflowStep.Sbt(
-    List("docs/mdoc"),
-    cond = Some(s"matrix.scala == '$Scala213' && matrix.ci == 'ciJVM'")),
+  // WorkflowStep.Sbt(
+  //   List("docs/mdoc"),
+  //   cond = Some(s"matrix.scala == '$Scala3' && matrix.ci == 'ciJVM'")),
 )
 
 ThisBuild / githubWorkflowBuildMatrixAdditions += "ci" -> List("ciJVM")
 
-ThisBuild / homepage := Some(url("https://github.com/TimWSpence/cats-stm"))
+ThisBuild / homepage := Some(url("https://github.com/TimWSpence/claws"))
 
 ThisBuild / scmInfo := Some(
   ScmInfo(
@@ -85,6 +85,8 @@ lazy val commonSettings = Seq(
     "org.typelevel"              %% "scalacheck-effect-munit"   % ScalacheckEffectVersion % Test,
     "org.typelevel"              %% "munit-cats-effect-3"       % MunitCatsEffectVersion % Test
   ),
+  scalacOptions := scalacOptions.value.filterNot(_ == "-source:3.0-migration") :+ "-source:future",
+  scalacOptions ++= Seq("-Ykind-projector"),
 )
 
 lazy val skipOnPublishSettings = Seq(
