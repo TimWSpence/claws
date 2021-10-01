@@ -18,4 +18,4 @@ package io.github.timwspence.claws
 
 object syntax:
   extension[A](x: A)
-    def <|[M](t: FingerTree[M, A]): FingerTree[M, A] = new FingerTree(t.tree.prepend(x)(using t.ev), t.ev)
+    def <|[M](t: FingerTree[M, A]): FingerTree[M, A] = t.prepend(x)

@@ -24,6 +24,12 @@ class FingerTree[M, A] private[claws](private[claws] val tree: FingerTree.Intern
 
   def |>(x: A): FingerTree[M, A] = new FingerTree(tree.append(x), ev)
 
+  def append(x: A): FingerTree[M, A] = |>(x)
+
+  def prepend(x: A): FingerTree[M, A] = new FingerTree(tree.prepend(x), ev)
+
+  def map[M2, B](f: A => B)(using M: Measured[M2, B]): FingerTree[M2, B] = new FingerTree(tree.map(f), M)
+
 object FingerTree:
 
   def empty[M, A](using M: Measured[M, A]): FingerTree[M, A] =
