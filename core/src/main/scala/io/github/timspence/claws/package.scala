@@ -22,6 +22,8 @@ import cats.Monoid
 class FingerTree[M, A] private[claws](private[claws] val tree: FingerTree.Internal.Tree[M, A], private[claws] val ev: Measured[M, A]):
   private given Measured[M, A] = ev
 
+  def |>(x: A): FingerTree[M, A] = new FingerTree(tree.append(x), ev)
+
 object FingerTree:
 
   def empty[M, A](using M: Measured[M, A]): FingerTree[M, A] =
@@ -46,10 +48,17 @@ object FingerTree:
         case Single(x) => Single(f(x))
         case Deep(l, t, r, _) => Tree.deep(l.map(f), t.map(_.map(f)), r.map(f))
 
-      def prepend(x: A)(using Measured[M, A]): Tree[M, A] = this match
-         case Empty() => Single(x)
-         case Single(y) => Tree.deep(One(x), Empty(), One(y))
-         case Deep(l, r, t, _) => ???
+      def prepend(a: A)(using Measured[M, A]): Tree[M, A] = this match
+         case Empty() => Single(a)
+         case Single(x) => Tree.deep(One(a), Empty(), One(x))
+         case Deep(Four(w, x, y, z), t, r, _) => Tree.deep(Two(a, w), t.prepend(Node.node3(x, y, z)), r)
+         case Deep(l, t, r, _) => Tree.deep(l.cons(a), t, r)
+
+      def append(a: A)(using Measured[M, A]): Tree[M, A] = this match
+         case Empty() => Single(a)
+         case Single(x) => Tree.deep(One(x), Empty(), One(a))
+         case Deep(l, t, Four(w, x, y, z), _) => Tree.deep(l, t.append(Node.node3(w, x, y)), Two(z, a))
+         case Deep(l, t, r, _) => Tree.deep(l, t, r.snoc(a))
 
     object Tree:
       def deep[M, A](l: Digit[A], t: Tree[M, Node[M, A]], r: Digit[A])(using M: Measured[M, A]): Tree[M, A] = {
@@ -92,6 +101,18 @@ object FingerTree:
       case Two(x: A, y: A)
       case Three(x: A, y: A, z: A)
       case Four(w: A, x: A, y: A, z: A)
+
+      def cons(a: A): Digit[A] = this match
+        case One(x) => Two(a, x)
+        case Two(x, y) => Three(a, x, y)
+        case Three(x, y, z) => Four(a, x, y, z)
+        case _ => throw new IllegalArgumentException("Cannot cons to a Digit.Four")
+
+      def snoc(a: A): Digit[A] = this match
+        case One(x) => Two(x, a)
+        case Two(x, y) => Three(x, y, a)
+        case Three(x, y, z) => Four(x, y, z, a)
+        case _ => throw new IllegalArgumentException("Cannot snoc to a Digit.Four")
 
       def measure[M](using M: Measured[M, A]): M = {
         given Monoid[M] = M.ev
