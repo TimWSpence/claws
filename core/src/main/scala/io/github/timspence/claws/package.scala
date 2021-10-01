@@ -153,6 +153,13 @@ trait Measured[M, A]:
 object Measured:
   def apply[M, A](using M: Measured[M, A]): M.type = M
 
+  def liftFunction[M, A](f: A => M)(using M: Monoid[M]): Measured[M, A] =
+    new Measured[M, A]:
+      override val ev: Monoid[M] = M
+
+      extension (a: A)
+        def measure: M = f(a)
+
 object Test:
 
   given Measured[Int, String] = ???
